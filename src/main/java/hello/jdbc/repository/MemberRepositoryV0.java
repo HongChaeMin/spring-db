@@ -4,6 +4,7 @@ import hello.jdbc.domain.Member;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
+import java.util.NoSuchElementException;
 
 import static hello.jdbc.connection.DBConnectionUtil.getConnection;
 
@@ -34,6 +35,41 @@ public class MemberRepositoryV0 {
             throw e;
         } finally {
             close(connection, preparedStatement, null);
+        }
+    }
+
+    public Member findById(String memberId) throws SQLException {
+        String sql = "select * from member where member_id = ?";
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, memberId);
+
+            // 데이터를 변경할 때는 executeUpdate() 를 사용하지만, 데이터를 조회할 때는 executeQuery() 를 사용한다
+            // executeQuery() 는 결과를 ResultSet 에 담아서 반환
+            resultSet = preparedStatement.executeQuery();
+
+            // ResultSet 내부에 있는 커서( cursor )를 이동해서 다음 데이터를 조회
+            // rs.next() : 이것을 호출하면 커서가 다음으로 이동한다
+            //             참고로 최초의 커서는 데이터를 가리키고 있지 않기 때문에 rs.next() 를 최초 한번은 호출해야 데이터를 조회
+            if (resultSet.next()) {
+                Member member = new Member();
+                member.setMemberId(resultSet.getString("member_id"));
+                member.setMoney(resultSet.getInt("money"));
+                return member;
+            } else {
+                throw new NoSuchElementException("member not found memberId : " + memberId);
+            }
+        } catch (SQLException e) {
+            log.error("db error {}", e);
+            throw e;
+        } finally {
+            close(connection, preparedStatement, resultSet);
         }
     }
 
