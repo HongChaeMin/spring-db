@@ -15,7 +15,7 @@ public class DBConnectionUtil {
     // 이렇게 하면 라이브러리에 있는 데이터베이스 드라이버를 찾아서 해당 드라이버가 제공하는 커넥션을 반환
     public static Connection getConnection() {
         try {
-            Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD0);
+            Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             log.info("get connection : {}, class : {}", connection, connection.getClass());
             return connection;
         } catch (SQLException e) {
