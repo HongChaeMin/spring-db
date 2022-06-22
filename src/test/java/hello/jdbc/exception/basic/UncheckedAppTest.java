@@ -21,10 +21,7 @@ public class UncheckedAppTest {
     try {
       controller.request();
     } catch (Exception e) {
-      log.error("ex", e); // 로그를 출력할 때 마지막 파라미터에 예외를 넣어주면 로그에 스택 트레이스를 출력
-
-      // System.out 에 스택 트레이스를 출력하려면 e.printStackTrace() 를 사용하면 된다
-      // - 실무에서는 항상 로그를 사용해야 한다는 점을 기억
+      log.error("ex", e);
     }
   }
 
@@ -61,7 +58,6 @@ public class UncheckedAppTest {
         // 체크 예외인 SQLException 이 발생하면 런타임 예외인 RuntimeSQLException 으로 전환해서 예외
         // 참고로 이때 기존 예외를 포함해주어야 예외 출력시 스택 트레이스에서 기존 예외도 함께 확인
         throw new RuntimeSQLException(e);
-        // throw new RuntimeSQLException(); -> 기존 예외 미포함
       }
     }
 
@@ -82,9 +78,6 @@ public class UncheckedAppTest {
   static class RuntimeSQLException extends RuntimeException {
     public RuntimeSQLException(Throwable cause) {
       super(cause);
-    }
-
-    public RuntimeSQLException() {
     }
   }
 
