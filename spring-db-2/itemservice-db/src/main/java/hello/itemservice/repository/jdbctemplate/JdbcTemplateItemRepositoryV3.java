@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -27,11 +28,11 @@ import org.springframework.util.StringUtils;
 @Repository
 public class JdbcTemplateItemRepositoryV3 implements ItemRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
     public JdbcTemplateItemRepositoryV3(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         this.jdbcInsert = new SimpleJdbcInsert(dataSource)
             .withTableName("item") // 데이터를 저장할 테이블 명을 지정한다
             .usingGeneratedKeyColumns("id"); // key 를 생성하는 PK 컬럼 명을 지정한다
@@ -49,7 +50,7 @@ public class JdbcTemplateItemRepositoryV3 implements ItemRepository {
 
     @Override
     public void update(Long itemId, ItemUpdateDto updateParam) {
-        String sql = "update item "
+        /*String sql = "update item "
             + "set item_name=:itemName, price=:price, quantity=:quantity "
             + "where id=:id";
 
@@ -59,7 +60,17 @@ public class JdbcTemplateItemRepositoryV3 implements ItemRepository {
             .addValue("price", updateParam.getPrice())
             .addValue("quantity", updateParam.getQuantity())
             .addValue("id", itemId); // 이 부분이 별도로 필요하다
+        jdbcTemplate.update(sql, param);*/
+
+        String sql = "update item set item_name=:itemName, price=:price, quantity=:quantity where id=:id";
+
+        SqlParameterSource param = new MapSqlParameterSource()
+            .addValue("itemName", updateParam.getItemName())
+            .addValue("price", updateParam.getPrice())
+            .addValue("quantity", updateParam.getQuantity())
+            .addValue("id", itemId);
         jdbcTemplate.update(sql, param);
+
     }
 
     @Override
@@ -69,7 +80,7 @@ public class JdbcTemplateItemRepositoryV3 implements ItemRepository {
         try {
             // 단순히 Map을 사용한다
             Map<String, Object> param = Map.of("id", id);
-            Item item = jdbcTemplate.queryForObject(sql, new Map[]{param}, itemRowMapper());
+            Item item = jdbcTemplate.queryForObject(sql, param, itemRowMapper());
             return Optional.of(item);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -102,7 +113,7 @@ public class JdbcTemplateItemRepositoryV3 implements ItemRepository {
             sql += " price <= ?";
         }
         log.info("sql={}", sql);
-        return jdbcTemplate.query(sql, new SqlParameterSource[]{param}, itemRowMapper());
+        return jdbcTemplate.query(sql, param, itemRowMapper());
     }
 
     private RowMapper<Item> itemRowMapper() {

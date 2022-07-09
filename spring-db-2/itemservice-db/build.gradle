@@ -32,7 +32,7 @@ dependencies {
 	// JdbcTemplate 추가
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	// database
-	runtimeOnly 'com.h2database:h2'
+	implementation 'com.h2database:h2'
 
 }
 

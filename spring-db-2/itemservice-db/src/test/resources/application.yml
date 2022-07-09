@@ -4,7 +4,7 @@ spring:
     username: sa
     password:
   profiles:
-    active: local
+    active: test
 
 # JdbcTemplate sql log
 logging:
