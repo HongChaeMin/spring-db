@@ -12,3 +12,17 @@ logging:
     org:
       springframework:
         jdbc: debug
+  hello:
+    itemservice:
+      repository:
+        mybatis: trace
+
+# MyBatis
+mybatis:
+  # 마이바티스에서 타입 정보를 사용할 때는 패키지 이름을 적어주어야 하는데, 여기에 명시하면 패키지 이름을 생략할 수 있다
+  # 지정한 패키지와 그 하위 패키지가 자동으로 인식된다
+  # 여러 위치를 지정하려면 , , ; 로 구분하면 된다
+  type-aliases-package: hello.itemservice.domain
+  configuration:
+    # JdbcTemplate의 BeanPropertyRowMapper 에서 처럼 언더바를 카멜로 자동 변경해주는 기능을 활성화 한다
+    map-underscore-to-camel-case: true
