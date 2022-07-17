@@ -7,15 +7,15 @@ spring:
     active: local
 
 # JdbcTemplate sql log
-logging:
-  level:
-    org:
-      springframework:
-        jdbc: debug
-  hello:
-    itemservice:
-      repository:
-        mybatis: trace
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        jdbc: debug
+#  hello:
+#    itemservice:
+#      repository:
+#        mybatis: trace
 
 # MyBatis
 mybatis:
@@ -26,3 +26,14 @@ mybatis:
   configuration:
     # JdbcTemplate의 BeanPropertyRowMapper 에서 처럼 언더바를 카멜로 자동 변경해주는 기능을 활성화 한다
     map-underscore-to-camel-case: true
+
+#JPA log
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+      type:
+        descriptor:
+          sql:
+            BasicBinder: TRACE
