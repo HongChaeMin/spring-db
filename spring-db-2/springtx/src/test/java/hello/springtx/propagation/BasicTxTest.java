@@ -2,6 +2,7 @@ package hello.springtx.propagation;
 
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 @Slf4j
@@ -81,13 +83,36 @@ public class BasicTxTest {
     TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
     log.info("outer.isNewTransaction() = {}", outer.isNewTransaction()); // 처음 시작한 트랜잭션이냐?
 
-    inner();
+    innerTransactionCommit();
 
     log.info("outer transaction commit");
     txManager.commit(outer);
   }
 
-  private void inner() {
+  @Test
+  void outerRollback() {
+    log.info("start transaction outer");
+    TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+
+    innerTransactionCommit();
+
+    log.info("outer transaction rollback");
+    txManager.rollback(outer);
+  }
+
+  @Test
+  void innerRollback() {
+    log.info("start outer transaction");
+    TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+
+    innerTransactionRollback();
+
+    log.info("outer transaction commit");
+    Assertions.assertThatThrownBy(() -> txManager.commit(outer))
+        .isInstanceOf(UnexpectedRollbackException.class);
+  }
+
+  private void innerTransactionCommit() {
     log.info("start transaction inner");
     TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
     log.info("inner.isNewTransaction() = {}", inner.isNewTransaction()); // 처음 시작한 트랜잭션이냐?
@@ -96,15 +121,14 @@ public class BasicTxTest {
     txManager.commit(inner);
   }
 
-  @Test
-  void outerRollback() {
-    log.info("start transaction outer");
-    TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+  private void innerTransactionRollback() {
+    log.info("start transaction inner");
+    TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
+    log.info("inner.isNewTransaction() = {}", inner.isNewTransaction());
 
-    inner();
-
-    log.info("outer transaction rollback");
-    txManager.rollback(outer);
+    log.info("inner transaction rollback");
+    txManager.rollback(inner);
   }
+
 
 }
