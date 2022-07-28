@@ -37,7 +37,22 @@ class MemberServiceTest {
     assertTrue(logRepository.find(userName).isPresent());
   }
 
+  /**
+   * MemberService    @Transactional: OFF
+   * MemberRepository @Transactional: ON
+   * LogRepository    @Transactional: ON Exception
+   **/
   @Test
-  void joinV2() {
+  void outerTxOff_fail() {
+    // given
+    String userName = "로그예외_outerTxOff_fail";
+
+    // when
+    Assertions.assertThatThrownBy(() -> memberService.joinV1(userName))
+        .isInstanceOf(RuntimeException.class);
+
+    // then : 완전히 롤백되지 않고, member 데이터가 남아서 저장된다 (각각 다른 connection)
+    assertTrue(memberRepository.find(userName).isPresent());
+    assertTrue(logRepository.find(userName).isPresent());
   }
 }
