@@ -32,14 +32,14 @@ public class MemberService {
     log.info("== start call memberRepository ==");
     memberRepository.save(member);
 
-    log.info("== logRepository 호출 시작 ==");
+    log.info("=== start call logRepository ====");
     try {
       logRepository.save(logMessage);
     } catch (RuntimeException e) {
-      log.info("log 저장에 실패했습니다. logMessage={}", logMessage.getMessage());
+      log.info("log 저장에 실패했습니다. logMessage = {}", logMessage.getMessage());
       log.info("정상 흐름 변환");
     }
-    log.info("== logRepository 호출 종료 ==");
+    log.info("==== end call logRepository =====");
   }
 
 }
