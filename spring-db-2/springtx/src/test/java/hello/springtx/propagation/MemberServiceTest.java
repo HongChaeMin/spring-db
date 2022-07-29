@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 @Slf4j
 @SpringBootTest
@@ -105,6 +106,25 @@ class MemberServiceTest {
     // when
     assertThatThrownBy(() -> memberService.joinV1(userName))
         .isInstanceOf(RuntimeException.class);
+
+    // then : 모든 데이터 롤백
+    assertTrue(memberRepository.find(userName).isEmpty());
+    assertTrue(logRepository.find(userName).isEmpty());
+  }
+
+  /**
+   * MemberService    @Transactional: ON
+   * MemberRepository @Transactional: ON
+   * LogRepository    @Transactional: ON Exception
+   **/
+  @Test
+  void recoverException_fail() {
+    // given
+    String userName = "로그 예외_recoverException_fail";
+
+    // when
+    assertThatThrownBy(() -> memberService.joinV2(userName))
+        .isInstanceOf(UnexpectedRollbackException.class);
 
     // then : 모든 데이터 롤백
     assertTrue(memberRepository.find(userName).isEmpty());
