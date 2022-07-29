@@ -92,4 +92,23 @@ class MemberServiceTest {
     assertTrue(logRepository.find(userName).isPresent());
   }
 
+  /**
+   * MemberService    @Transactional: ON
+   * MemberRepository @Transactional: ON
+   * LogRepository    @Transactional: ON Exception
+   **/
+  @Test
+  void outerTxOn_fail() {
+    // given
+    String userName = "로그 예외_outerTxOn_fail";
+
+    // when
+    assertThatThrownBy(() -> memberService.joinV1(userName))
+        .isInstanceOf(RuntimeException.class);
+
+    // then : 모든 데이터 롤백
+    assertTrue(memberRepository.find(userName).isEmpty());
+    assertTrue(logRepository.find(userName).isEmpty());
+  }
+
 }
