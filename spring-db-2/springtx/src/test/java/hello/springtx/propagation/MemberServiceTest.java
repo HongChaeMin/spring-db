@@ -1,9 +1,9 @@
 package hello.springtx.propagation;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,14 +45,33 @@ class MemberServiceTest {
   @Test
   void outerTxOff_fail() {
     // given
-    String userName = "로그예외_outerTxOff_fail";
+    String userName = "로그 예외_outerTxOff_fail";
 
     // when
-    Assertions.assertThatThrownBy(() -> memberService.joinV1(userName))
+    assertThatThrownBy(() -> memberService.joinV1(userName))
         .isInstanceOf(RuntimeException.class);
 
     // then : 완전히 롤백되지 않고, member 데이터가 남아서 저장된다 (각각 다른 connection)
     assertTrue(memberRepository.find(userName).isPresent());
+    assertTrue(logRepository.find(userName).isEmpty());
+  }
+
+  /**
+   * MemberService    @Transactional: ON
+   * MemberRepository @Transactional: OF
+   * LogRepository    @Transactional: OF
+   **/
+  @Test
+  void singleTx() {
+    // given
+    String userName = "singleTx";
+
+    // when
+    memberService.joinV1(userName);
+
+    // then
+    assertTrue(memberRepository.find(userName).isPresent());
     assertTrue(logRepository.find(userName).isPresent());
   }
+
 }
